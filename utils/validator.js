@@ -21,6 +21,9 @@ module.exports = {
             next()
         }
     },
+
+
+
     validationSiginUp: [
         body("username").isAlphanumeric().withMessage(ERROR_USERNAME),
         body("password").isStrongPassword(options.password).withMessage(util.format(ERROR_PASSWORD,
@@ -43,5 +46,12 @@ module.exports = {
             options.password.minSymbols,
         )),
         body('role').isIn(['user', 'admin', 'mod']).withMessage("role khong hop le")
+    ],
+    validationChangePassword:[
+        body("password").isStrongPassword(options.password).withMessage(ERROR_PASSWORD)
+    ],
+    validationLogin:[
+        body("password").isStrongPassword(options.password).withMessage("user hoac password khong dung")
     ]
+
 }
