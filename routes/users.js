@@ -4,7 +4,7 @@ let userController = require('../controllers/users')
 var { CreateSuccessRes, CreateErrorRes } = require('../utils/ResHandler')
 let {check_authentication,check_authorization} = require('../utils/check_auth')
 let constants = require('../utils/constants')
-
+let {validate,validationCreateUser} = require('../utils/validator')
 /* GET users listing. */
 router.get('/',check_authentication,check_authorization(constants.ADMIN_PERMISSION), async function (req, res, next) {
   try {
@@ -14,7 +14,7 @@ router.get('/',check_authentication,check_authorization(constants.ADMIN_PERMISSI
     next(error)
   }
 });
-router.get('/:id',check_authentication, async function (req, res, next) {
+router.get('/:id',check_authentication,check_authorization(constants.MOD_PERMISSION), async function (req, res, next) {
   try {
     let user = await userController.GetUserById(req.params.id)
     CreateSuccessRes(res, 200, user);
@@ -22,7 +22,7 @@ router.get('/:id',check_authentication, async function (req, res, next) {
     CreateErrorRes(res, 404, error);
   }
 });
-router.post('/', async function (req, res, next) {
+router.post('/',check_authentication,check_authorization(constants.ADMIN_PERMISSION),validationCreateUser,validate, async function (req, res, next) {
   try {
     let body = req.body
     let newUser = await userController.CreateAnUser(body.username, body.password, body.email, body.role);
