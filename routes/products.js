@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const slugify = require('slugify');
 let productModel = require('../schemas/product');
-let CategoryModel = require('../schemas/category');
+let categoryModel = require('../schemas/category');
 
 function buildQuery(obj) {
   let result = {};
@@ -34,20 +34,23 @@ router.get('/', async function (req, res, next) {
   res.status(200).send({ success: true, data: products });
 });
 
-// Lấy sản phẩm theo `id`
-router.get('/:id', async function (req, res, next) {
+// Lấy tất cả sản phẩm theo `categorySlug`
+router.get('/:categorySlug', async function (req, res, next) {
   try {
-    let product = await productModel.findById(req.params.id);
-    res.status(200).send({ success: true, data: product });
+    let category = await categoryModel.findOne({ slug: req.params.categorySlug });
+    if (!category) return res.status(404).send({ success: false, message: "Category không tồn tại" });
+
+    let products = await productModel.find({ category: category._id });
+    res.status(200).send({ success: true, data: products });
   } catch (error) {
-    res.status(404).send({ success: false, message: "khong co id phu hop" });
+    res.status(404).send({ success: false, message: error.message });
   }
 });
 
 // Lấy sản phẩm theo `slug`
-router.get('/slug/:categorySlug/:productSlug', async function (req, res, next) {
+router.get('/:categorySlug/:productSlug', async function (req, res, next) {
   try {
-    let category = await CategoryModel.findOne({ slug: req.params.categorySlug });
+    let category = await categoryModel.findOne({ slug: req.params.categorySlug });
     if (!category) return res.status(404).send({ success: false, message: "Category không tồn tại" });
 
     let product = await productModel.findOne({ slug: req.params.productSlug, category: category._id });
@@ -59,23 +62,10 @@ router.get('/slug/:categorySlug/:productSlug', async function (req, res, next) {
   }
 });
 
-// Lấy tất cả sản phẩm theo `categorySlug`
-router.get('/slug/:categorySlug', async function (req, res, next) {
-  try {
-    let category = await CategoryModel.findOne({ slug: req.params.categorySlug });
-    if (!category) return res.status(404).send({ success: false, message: "Category không tồn tại" });
-
-    let products = await productModel.find({ category: category._id });
-    res.status(200).send({ success: true, data: products });
-  } catch (error) {
-    res.status(404).send({ success: false, message: error.message });
-  }
-});
-
 // Tạo mới sản phẩm (tự động tạo slug)
 router.post('/', async function (req, res, next) {
   try {
-    let category = await CategoryModel.findOne({ name: req.body.category });
+    let category = await categoryModel.findOne({ name: req.body.category });
     if (!category) return res.status(404).send({ success: false, message: "Category không đúng" });
 
     let newProduct = new productModel({
@@ -106,24 +96,6 @@ router.put('/:id', async function (req, res, next) {
 
     let updatedProduct = await productModel.findByIdAndUpdate(req.params.id, updateObj, { new: true });
     res.status(200).send({ success: true, data: updatedProduct });
-  } catch (error) {
-    res.status(404).send({ success: false, message: error.message });
-  }
-});
-// Xóa sản phẩm theo `slug` (soft delete)
-router.delete('/slug/:categorySlug/:productSlug', async function (req, res, next) {
-  try {
-    // Tìm category dựa trên slug
-    let category = await CategoryModel.findOne({ slug: req.params.categorySlug });
-    if (!category) return res.status(404).send({ success: false, message: "Category không tồn tại" });
-
-    // Tìm sản phẩm trong category theo slug
-    let product = await productModel.findOne({ slug: req.params.productSlug, category: category._id });
-    if (!product) return res.status(404).send({ success: false, message: "Product không tồn tại" });
-
-    // Thực hiện soft delete (cập nhật trường `isDeleted`)
-    let deletedProduct = await productModel.findByIdAndUpdate(product._id, { isDeleted: true }, { new: true });
-    res.status(200).send({ success: true, data: deletedProduct });
   } catch (error) {
     res.status(404).send({ success: false, message: error.message });
   }

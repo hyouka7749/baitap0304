@@ -9,20 +9,10 @@ router.get('/', async function (req, res, next) {
   res.status(200).send({ success: true, data: categories });
 });
 
-// Lấy category theo `id`
-router.get('/:id', async function (req, res, next) {
-  try {
-    let category = await categoryModel.findById(req.params.id);
-    res.status(200).send({ success: true, data: category });
-  } catch (error) {
-    res.status(404).send({ success: false, message: "khong co id phu hop" });
-  }
-});
-
 // Lấy category theo `slug`
-router.get('/slug/:categorySlug', async function (req, res, next) {
+router.get('/:slug', async function (req, res, next) {
   try {
-    let category = await categoryModel.findOne({ slug: req.params.categorySlug });
+    let category = await categoryModel.findOne({ slug: req.params.slug });
     if (!category) throw new Error("Category không tồn tại");
 
     res.status(200).send({ success: true, data: category });
