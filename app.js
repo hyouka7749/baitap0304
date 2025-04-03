@@ -28,8 +28,8 @@ app.use('/auth', require('./routes/auth'));
 app.use('/products', require('./routes/products'));
 app.use('/categories', require('./routes/categories'));
 //
-mongoose.connect('mongodb://localhost:27017/C5');
-mongoose.connection.on('connected',function(){
+mongoose.connect('mongodb+srv://hanguyen:7749@soundmagic.pfszq1v.mongodb.net/?retryWrites=true&w=majority&appName=SoundMagic');
+mongoose.connection.on('mongodb connected',function(){
   console.log("connected");
 })
 

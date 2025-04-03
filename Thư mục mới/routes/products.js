@@ -110,24 +110,6 @@ router.put('/:id', async function (req, res, next) {
     res.status(404).send({ success: false, message: error.message });
   }
 });
-// Xóa sản phẩm theo `slug` (soft delete)
-router.delete('/slug/:categorySlug/:productSlug', async function (req, res, next) {
-  try {
-    // Tìm category dựa trên slug
-    let category = await CategoryModel.findOne({ slug: req.params.categorySlug });
-    if (!category) return res.status(404).send({ success: false, message: "Category không tồn tại" });
-
-    // Tìm sản phẩm trong category theo slug
-    let product = await productModel.findOne({ slug: req.params.productSlug, category: category._id });
-    if (!product) return res.status(404).send({ success: false, message: "Product không tồn tại" });
-
-    // Thực hiện soft delete (cập nhật trường `isDeleted`)
-    let deletedProduct = await productModel.findByIdAndUpdate(product._id, { isDeleted: true }, { new: true });
-    res.status(200).send({ success: true, data: deletedProduct });
-  } catch (error) {
-    res.status(404).send({ success: false, message: error.message });
-  }
-});
 
 // Xóa sản phẩm (soft delete)
 router.delete('/:id', async function (req, res, next) {
