@@ -1,2 +1,1 @@
-# NNPTUD_C5
-Mỗi ngày là 1 nhánh 
+Nguyễn Thanh Hà 2180604282
